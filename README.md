@@ -32,6 +32,7 @@ A full-stack web application for managing user accounts with authentication, CRU
 - **dotenv** - Environment variables
 
 ## Project Structure
+```
 
 user-management-system/
 ├── backend/ # Express server
@@ -72,7 +73,7 @@ user-management-system/
 │ │ └── OutletComponent.jsx
 │ └── assets/
 └── public/
-
+```
 
 ## API Endpoints
 

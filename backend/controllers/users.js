@@ -42,10 +42,11 @@ export async function login(req, res) {
     );
     res.cookie("userToken", userToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 60 * 60 * 1000,
     });
+
     return res.status(200).json({ message: "User logged in successfully " });
   } catch (error) {
     return res.status(500).json({ message: error.message });
