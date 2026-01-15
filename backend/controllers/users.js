@@ -1,0 +1,110 @@
+import Users from "../models/users.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
+
+export async function addUser(req, res) {
+  try {
+    const data = req.body;
+    if (!data) {
+      return res
+        .status(400)
+        .json({ message: "No Data found with the request" });
+    }
+    if (data.password) {
+      const salt = await bcrypt.genSalt(10);
+      data.password = await bcrypt.hash(data.password, salt);
+    }
+    const newUser = new Users(data);
+    await newUser.save();
+    return res.status(201).json({ message: "User added", user: newUser });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function login(req, res) {
+  try {
+    const { username, password } = req.body;
+    const user = await Users.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+    const userToken = jwt.sign(
+      { id: user._id, username: user.username },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+    res.cookie("userToken", userToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000,
+    });
+    return res.status(200).json({ message: "User logged in successfully " });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function getUsers(req, res) {
+  try {
+    const data = await Users.find({});
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function getUserById(req, res) {
+  try {
+    const { id } = req.params;
+    const data = await Users.findById(id);
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function updateUser(req, res) {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    if (Object.keys(data).length === 0) {
+      return res
+        .status(400)
+        .json({ message: "No data found with the request" });
+    }
+
+    if (req.user.id !== id) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const updatedUser = await Users.findByIdAndUpdate(id, data, { new: true });
+
+    return res.status(200).json({
+      message: "User Updated",
+      user: updatedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function deleteUser(req, res) {
+  try {
+    const { id } = req.params;
+    const deletedUser = await Users.findByIdAndDelete(id);
+    return res.status(200).json({ message: "User Deleted", user: deletedUser });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}
+
+export async function checkUser(req, res) {}

@@ -1,0 +1,395 @@
+/* =========================
+   CSS RESET + VARIABLES
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-light: #f5f7fb;
+  --bg-dark: #0f172a;
+
+  --card-light: #ffffff;
+  --card-dark: #020617;
+
+  --text-light: #020617;
+  --text-dark: #e5e7eb;
+
+  --primary: #2563eb;
+  --primary-dark: #22c55e;
+
+  --border-light: #d1d5db;
+  --border-dark: #334155;
+
+  --success: #16a34a;
+  --error: #dc2626;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
+/* =========================
+   DARK MODE
+========================= */
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* =========================
+   HEADER
+========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: var(--primary);
+  color: white;
+}
+
+body.dark .header {
+  background: var(--card-dark);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.theme-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* =========================
+   AUTH PAGES (LOGIN + REGISTER)
+========================= */
+.login-container,
+.register-container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box,
+.register-box {
+  background: var(--card-light);
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .login-box,
+body.dark .register-box {
+  background: var(--card-dark);
+}
+
+/* =========================
+   FORM ELEMENTS
+========================= */
+h2 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+input {
+  width: 100%;
+  padding: 11px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  font-size: 15px;
+}
+
+body.dark input {
+  background: var(--card-dark);
+  color: var(--text-dark);
+  border: 1px solid var(--border-dark);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.input-error {
+  border-color: var(--error);
+}
+
+/* =========================
+   PASSWORD FIELD
+========================= */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper span {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+button {
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+body.dark button {
+  background: var(--primary-dark);
+}
+
+/* =========================
+   MESSAGES
+========================= */
+.success {
+  color: var(--success);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: var(--error);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   PASSWORD RULES
+========================= */
+.password-rules {
+  list-style: none;
+  padding-left: 0;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.password-rules li {
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.password-rules li.met {
+  color: var(--success);
+}
+
+/* =========================
+   LINKS
+========================= */
+p {
+  text-align: center;
+  margin-top: 12px;
+}
+
+p a {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+body.dark p a {
+  color: var(--primary-dark);
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   THEME TOGGLE (LOGIN / REGISTER)
+========================= */
+.theme-toggle {
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   USER TABLE
+========================= */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card-light);
+}
+
+body.dark .user-table {
+  background: var(--card-dark);
+}
+
+.user-table th,
+.user-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-light);
+  text-align: left;
+}
+
+body.dark .user-table th,
+body.dark .user-table td {
+  border-color: var(--border-dark);
+}
+
+.user-table th {
+  background: #e5e7eb;
+}
+
+body.dark .user-table th {
+  background: #020617;
+}
+
+.action-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* =========================
+   ACTION ICON BUTTONS
+========================= */
+.action-cell {
+  display: flex;
+  gap: 10px;
+}
+
+.icon-btn {
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn.edit {
+  background: #2563eb;
+  color: white;
+}
+
+.icon-btn.delete {
+  background: #dc2626;
+  color: white;
+}
+
+.icon-btn:hover {
+  opacity: 0.85;
+}
+/* =========================
+   EDIT USER PAGE
+========================= */
+.edit-container {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.edit-box {
+  background: var(--card-light);
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .edit-box {
+  background: var(--card-dark);
+}
+
+.edit-box input {
+  width: 100%;
+  padding: 11px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+body.dark .edit-box input {
+  background: var(--card-dark);
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.edit-box input:disabled {
+  background: #e5e7eb;
+  cursor: not-allowed;
+}
+
+body.dark .edit-box input:disabled {
+  background: #1e293b;
+}
+
+.edit-box button {
+  width: 100%;
+}
+.input-error {
+  border-color: #dc2626;
+}
+
+.error {
+  color: #dc2626;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
