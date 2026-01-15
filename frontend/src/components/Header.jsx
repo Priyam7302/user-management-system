@@ -3,15 +3,23 @@ import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const navigate = useNavigate();
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+
+  // ✅ Initialize theme once (dark by default)
+  const [isDark, setIsDark] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme ? savedTheme === "dark" : true;
+  });
 
   useEffect(() => {
     setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
   }, []);
 
+  // ✅ Apply theme to body
   useEffect(() => {
-    document.body.className = isDark ? "dark" : "";
+    document.body.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
   const handleLogout = () => {
@@ -22,10 +30,8 @@ const Header = () => {
 
   return (
     <header className="header">
-      {/* Left */}
       <h2 className="logo">UserManagement System</h2>
 
-      {/* Right */}
       <nav className="nav">
         <Link to="/">Home</Link>
 
@@ -39,7 +45,10 @@ const Header = () => {
           </button>
         )}
 
-        <button className="theme-btn" onClick={() => setIsDark(!isDark)}>
+        <button
+          className="theme-btn"
+          onClick={() => setIsDark((prev) => !prev)}
+        >
           {isDark ? "☀ Light" : "🌙 Dark"}
         </button>
       </nav>
