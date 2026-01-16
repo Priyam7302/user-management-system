@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaCheck } from "react-icons/fa";
 import instance from "../../axiosConfig";
-import { useNavigate } from "react-router-dom";
+
+// 🔹 Regex rules
+const emailRegex = /^[^\s@]{3,}@[^\s@]+\.[^\s@]+$/;
+const usernameRegex = /^[a-z0-9_]{4,}$/;
 
 const Register = () => {
   const navigate = useNavigate();
 
+  // 🔹 Form data
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -14,10 +18,16 @@ const Register = () => {
     password: "",
   });
 
+  // 🔹 UI states
   const [message, setMessage] = useState({ type: "", text: "" });
   const [showPassword, setShowPassword] = useState(false);
 
-  const [passwordCriteria, setPasswordCriteria] = useState({
+  // 🔹 Validation states
+  const [emailError, setEmailError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+
+  // 🔹 Password rules
+  const [passwordRules, setPasswordRules] = useState({
     length: false,
     lower: false,
     upper: false,
@@ -25,11 +35,12 @@ const Register = () => {
     special: false,
   });
 
-  const allMet = Object.values(passwordCriteria).every(Boolean);
+  const passwordValid = Object.values(passwordRules).every(Boolean);
 
+  // 🔐 Password validation
   useEffect(() => {
     const pwd = data.password;
-    setPasswordCriteria({
+    setPasswordRules({
       length: pwd.length >= 8,
       lower: /[a-z]/.test(pwd),
       upper: /[A-Z]/.test(pwd),
@@ -38,27 +49,87 @@ const Register = () => {
     });
   }, [data.password]);
 
+  // 🔹 Input handler
   function handleChange(e) {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
+
+    // Email format validation
+    if (name === "email") {
+      if (!emailRegex.test(value)) {
+        setEmailError("Invalid email format");
+      } else {
+        setEmailError("");
+      }
+    }
+
+    // Username format validation
+    if (name === "username") {
+      if (!usernameRegex.test(value)) {
+        setUsernameError("Username must be 4+ chars (lowercase, numbers, _)");
+      } else {
+        setUsernameError("");
+      }
+    }
   }
 
+  // 🔍 Email uniqueness check
+  async function handleEmailBlur() {
+    if (!data.email || emailError) return;
+
+    try {
+      const res = await instance.get(
+        `/users/check?field=email&value=${data.email}`
+      );
+
+      if (res.data.exists) {
+        setEmailError("Email already exists");
+      }
+    } catch {
+      setEmailError("Email check failed");
+    }
+  }
+
+  // 🔍 Username uniqueness check
+  async function handleUsernameBlur() {
+    if (!data.username || usernameError) return;
+
+    try {
+      const res = await instance.get(
+        `/users/check?field=username&value=${data.username}`
+      );
+
+      if (res.data.exists) {
+        setUsernameError("Username already exists");
+      }
+    } catch {
+      setUsernameError("Username check failed");
+    }
+  }
+
+  // 🚀 Submit
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!allMet) {
+    // Final defensive validation
+    if (!data.name || !data.email || !data.username || !data.password) {
+      setMessage({ type: "error", text: "All fields are required" });
+      return;
+    }
+
+    if (emailError || usernameError || !passwordValid) {
       setMessage({
         type: "error",
-        text: "Please meet all password requirements",
+        text: "Please fix errors before submitting",
       });
       return;
     }
 
     try {
       const res = await instance.post("/users/add", data);
+
       if (res.status === 201) {
         setMessage({ type: "success", text: "Registration successful" });
-        setData({ name: "", email: "", username: "", password: "" });
         setTimeout(() => navigate("/login"), 1000);
       }
     } catch (err) {
@@ -87,19 +158,26 @@ const Register = () => {
             value={data.name}
             onChange={handleChange}
           />
+
           <input
             name="email"
-            type="email"
             placeholder="Email"
             value={data.email}
             onChange={handleChange}
+            onBlur={handleEmailBlur}
+            className={emailError ? "input-error" : ""}
           />
+          {emailError && <p className="error">{emailError}</p>}
+
           <input
             name="username"
             placeholder="Username"
             value={data.username}
             onChange={handleChange}
+            onBlur={handleUsernameBlur}
+            className={usernameError ? "input-error" : ""}
           />
+          {usernameError && <p className="error">{usernameError}</p>}
 
           <div className="password-wrapper">
             <input
@@ -108,7 +186,7 @@ const Register = () => {
               placeholder="Strong password"
               value={data.password}
               onChange={handleChange}
-              className={!allMet && data.password ? "input-error" : ""}
+              className={!passwordValid && data.password ? "input-error" : ""}
             />
             <span onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -117,25 +195,27 @@ const Register = () => {
 
           {data.password && (
             <ul className="password-rules">
-              <li className={passwordCriteria.length ? "met" : ""}>
+              <li className={passwordRules.length ? "met" : ""}>
                 <FaCheck /> 8 characters
               </li>
-              <li className={passwordCriteria.lower ? "met" : ""}>
+              <li className={passwordRules.lower ? "met" : ""}>
                 <FaCheck /> Lowercase
               </li>
-              <li className={passwordCriteria.upper ? "met" : ""}>
+              <li className={passwordRules.upper ? "met" : ""}>
                 <FaCheck /> Uppercase
               </li>
-              <li className={passwordCriteria.number ? "met" : ""}>
+              <li className={passwordRules.number ? "met" : ""}>
                 <FaCheck /> Number
               </li>
-              <li className={passwordCriteria.special ? "met" : ""}>
-                <FaCheck /> Special char
+              <li className={passwordRules.special ? "met" : ""}>
+                <FaCheck /> Special character
               </li>
             </ul>
           )}
 
-          <button disabled={!allMet}>Register</button>
+          <button disabled={emailError || usernameError || !passwordValid}>
+            Register
+          </button>
         </form>
 
         <p>

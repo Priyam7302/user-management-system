@@ -5,22 +5,70 @@ import "dotenv/config";
 
 export async function addUser(req, res) {
   try {
-    const data = req.body;
-    if (!data) {
-      return res
-        .status(400)
-        .json({ message: "No Data found with the request" });
+    const { name, email, username, password } = req.body;
+
+    //  Required fields check
+    if (!name || !email || !username || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
-    if (data.password) {
-      const salt = await bcrypt.genSalt(10);
-      data.password = await bcrypt.hash(data.password, salt);
+
+    //  Email format validation
+const emailRegex = /^[^\s@]{3,}@[^\s@]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Invalid email format",
+      });
     }
-    const newUser = new Users(data);
+
+    // Username format validation
+    const usernameRegex = /^[a-z0-9_]{4,}$/;
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({
+        message:
+          "Username must be at least 4 characters and contain only lowercase letters, numbers, and _",
+      });
+    }
+
+    //  Duplicate email check
+    const emailExists = await Users.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({
+        message: "Email already exists",
+      });
+    }
+
+    //  Duplicate username check
+    const usernameExists = await Users.findOne({ username });
+    if (usernameExists) {
+      return res.status(400).json({
+        message: "Username already exists",
+      });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Save clean user
+    const newUser = new Users({
+      name,
+      email,
+      username,
+      password: hashedPassword,
+    });
+
     await newUser.save();
-    return res.status(201).json({ message: "User added", user: newUser });
+
+    return res.status(201).json({
+      message: "User added successfully",
+    });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      message: "Server error",
+    });
   }
 }
 
@@ -108,4 +156,42 @@ export async function deleteUser(req, res) {
   }
 }
 
-export async function checkUser(req, res) {}
+export async function authCheck(req, res) {
+  return res.status(200).json({
+    authenticated: true,
+    user: req.user,
+  });
+}
+
+export function logout(req, res) {
+  res.cookie("userToken", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+
+  return res.status(200).json({ message: "Logged out successfully" });
+}
+
+export async function checkUserExists(req, res) {
+  try {
+    const { field, value } = req.query;
+
+    // allow only safe fields
+    const allowedFields = ["email", "username"];
+    if (!allowedFields.includes(field)) {
+      return res.status(400).json({ message: "Invalid field" });
+    }
+
+    if (!value) {
+      return res.status(400).json({ message: "Value is required" });
+    }
+
+    const exists = await Users.exists({ [field]: value });
+
+    return res.status(200).json({
+      exists: Boolean(exists),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}

@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import instance from "../../axiosConfig";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthProvider";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+
   const [data, setData] = useState({
     username: "",
     password: "",
@@ -17,35 +18,28 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setData({ ...data, [name]: value });
+    setData((prev) => ({ ...prev, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
+    setMessage({ type: "", text: "" });
 
     try {
-      const response = await instance.post("/users/login", data, {
-        withCredentials: true,
-      });
-
-      if (response.status === 200) {
-        setMessage({
-          type: "success",
-          text: response.data.message,
-        });
-
-        setData({ username: "", password: "" });
-        localStorage.setItem("isLoggedIn", "true");
-        navigate("/");
-      }
+      await login(data); // 🔥 AuthProvider handles everything
+      navigate("/", { replace: true });
     } catch (error) {
       setMessage({
         type: "error",
         text: error.response?.data?.message || "Login failed",
       });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -79,12 +73,14 @@ const Login = () => {
               onChange={handleChange}
               required
             />
-            <span onClick={() => setShowPassword(!showPassword)}>
+            <span onClick={() => setShowPassword((s) => !s)}>
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
 
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
 
         <p>

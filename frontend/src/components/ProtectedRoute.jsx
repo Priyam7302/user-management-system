@@ -1,10 +1,16 @@
-import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../contexts/AuthProvider";
 
 const ProtectedRoute = () => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const { isAuthenticated, loading } = useAuth();
 
-  return isLoggedIn ? <Outlet /> : <Navigate to="/login" replace />;
+  // Wait for auth-check to finish
+  if (loading) {
+    return <p>Checking authentication...</p>;
+  }
+
+  // Allow or block
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

@@ -6,6 +6,7 @@ import EditUser from "./pages/EditUser";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import About from "./pages/About";
+import { AuthProvider } from "./contexts/AuthProvider";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 };
 
 export default App;
